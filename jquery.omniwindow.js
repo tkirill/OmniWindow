@@ -93,9 +93,6 @@
             afterHide: function(subjects) {
               subjects.overlay.off(options.eventsNames.internal.overlayClick);
               $(document).off(options.eventsNames.internal.keyboardKeyUp);
-
-              subjects.overlay.css('display', ''); // clear inline styles after jQ animations
-              subjects.modal.css('display', '');
             }
           }
         }
