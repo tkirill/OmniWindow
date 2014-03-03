@@ -59,12 +59,12 @@
             keyboardKeyUp: 'keyup.ow'
           }
         },
-        callbacks: {                                                                                  // Callbacks execution chain
-          beforeShow:  function(subjects, internalCallback) { return internalCallback(subjects); },   // 1 (stop if retruns false)
-          positioning: function(subjects, internalCallback) { return internalCallback(subjects); },   // 2
-          afterShow:   function(subjects, internalCallback) { return internalCallback(subjects); },   // 3
-          beforeHide:  function(subjects, internalCallback) { return internalCallback(subjects); },   // 4 (stop if retruns false)
-          afterHide:   function(subjects, internalCallback) { return internalCallback(subjects); },   // 5
+        callbacks: {                                                                                             // Callbacks execution chain
+          beforeShow:  function(subjects, internalCallback) { return internalCallback(subjects); },              // 1 (stop if retruns false)
+          positioning: function(subjects, internalCallback, eventArgs) { return internalCallback(subjects); },   // 2
+          afterShow:   function(subjects, internalCallback) { return internalCallback(subjects); },              // 3
+          beforeHide:  function(subjects, internalCallback) { return internalCallback(subjects); },              // 4 (stop if retruns false)
+          afterHide:   function(subjects, internalCallback) { return internalCallback(subjects); },              // 5
           internal: {
             beforeShow: function(subjects) {
               if (subjects.modal.data(options.modal.internal.stateAttribute)) {
@@ -119,10 +119,10 @@
         });
       };
 
-      var showModal = function(subjects) {
+      var showModal = function(subjects, eventArgs) {
         if (!options.callbacks.beforeShow(subjects, options.callbacks.internal.beforeShow)) { return; } // cancel showing if beforeShow callback return false
 
-        options.callbacks.positioning(subjects, options.callbacks.internal.positioning);
+        options.callbacks.positioning(subjects, options.callbacks.internal.positioning, eventArgs);
 
         animate('show', subjects, 'afterShow');
       };
@@ -139,8 +139,8 @@
         var $modal  = $(this);
         var subjects = {modal: $modal, overlay: $overlay};
 
-        $modal.bind(options.eventsNames.show, function(){ showModal(subjects); })
-              .bind(options.eventsNames.hide, function(){ hideModal(subjects); });
+        $modal.on(options.eventsNames.show, function(eventObject, eventArgs){ showModal(subjects, eventArgs); })
+              .on(options.eventsNames.hide, function(){ hideModal(subjects); });
       });
     }
   });
