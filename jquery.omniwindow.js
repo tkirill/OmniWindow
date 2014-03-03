@@ -11,6 +11,12 @@
   }
 }(function($) {
   'use strict';
+
+  var defaultAnimationHandler = function(subjects, internalAnimation, callback) {
+    internalAnimation(subjects);
+    callback();
+  };
+
   $.fn.extend({
     omniWindow: function(options) {
 
@@ -23,8 +29,8 @@
           selector: '.ow-overlay',
           hideClass: 'ow-closed',
           animations: {
-            show: function(subjects, internalCallback) { return internalCallback(subjects); },
-            hide: function(subjects, internalCallback) { return internalCallback(subjects); },
+            show: defaultAnimationHandler,
+            hide: defaultAnimationHandler,
             internal: {
               show: function(subjects){ subjects.overlay.removeClass(options.overlay.hideClass); },
               hide: function(subjects){ subjects.overlay.addClass(options.overlay.hideClass); }
@@ -34,8 +40,8 @@
         modal:   {
           hideClass: 'ow-closed',
           animations: {
-            show: function(subjects, internalCallback) { return internalCallback(subjects); },
-            hide: function(subjects, internalCallback) { return internalCallback(subjects); },
+            show: defaultAnimationHandler,
+            hide: defaultAnimationHandler,
             internal: {
               show: function(subjects){ subjects.modal.removeClass(options.modal.hideClass); },
               hide: function(subjects){ subjects.modal.addClass(options.modal.hideClass); }
@@ -100,16 +106,14 @@
 
       var animate = function(process, subjects, callbackName) {
         var first  = options.animationsPriority[process][0],
-            second = options.animationsPriority[process][1];
+            second = options.animationsPriority[process][1],
+            firstInternal = options[first].animations.internal[process],
+            secondInternal = options[second].animations.internal[process];
 
-        options[first].animations[process](subjects, function(subjs) {        // call USER's    FIRST animation (depends on priority)
-          options[first].animations.internal[process](subjs);                 // call internal  FIRST animation
-
-          options[second].animations[process](subjects, function(subjs) {     // call USER's    SECOND animation
-            options[second].animations.internal[process](subjs);              // call internal  SECOND animation
-
-                                                                              // then we need to call USER's
-                                                                              // afterShow of afterHide callback
+        options[first].animations[process](subjects, firstInternal, function() {        // call USER's    FIRST animation (depends on priority)
+          options[second].animations[process](subjects, secondInternal, function() {    // call USER's    SECOND animation
+                                                                                        // then we need to call USER's
+                                                                                        // afterShow of afterHide callback
             options.callbacks[callbackName](subjects, options.callbacks.internal[callbackName]);
           });
         });
